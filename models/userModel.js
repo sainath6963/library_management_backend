@@ -1,53 +1,69 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email:{
-    type:String,
-    required:true,
-    lowercase:true,
-  },
-  password:{
-    type:String,
-    required:true,
-    select:false
-  },
-  role:{
-    type:String,
-    enum:["Admin", "User"],
-    default:"User",
-  },
-  accountVerified:{type:Boolean , default:false},
-  borrowedBooks:[
-    {
-        bookId:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"Borrow"
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: ["Admin", "User"],
+      default: "User",
+    },
+    accountVerified: { type: Boolean, default: false },
+    borrowedBooks: [
+      {
+        bookId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Borrow",
         },
-        returned:{
-            type:Boolean,
-            default:false,
+        returned: {
+          type: Boolean,
+          default: false,
         },
-        bookTitle:string,
-        borrowedDate:Date,
-        dueDate:Date,
-    }
-  ],
-  avtar:{
-    public_id:String,
-    url:String,
+        bookTitle: string,
+        borrowedDate: Date,
+        dueDate: Date,
+      },
+    ],
+    avtar: {
+      public_id: String,
+      url: String,
+    },
+    veficationCode: Number,
+    verificationCodeExpire: Date,
+    resetPasswordToken: Date,
   },
-  veficationCode:Number,
-  verificationCodeExpire: Date,
-  resetPasswordToken:Date,
-}, 
-{
-    timestamps:true
-});
+  {
+    timestamps: true,
+  }
+);
 
+userSchema.methods.generateVerificationCode = async function () {
+  function generateRandomFiveDigitNumber() {
+    const firstDigit = Math.floor(Math.random() * 9) + 1;
+    const remainingDigits = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(4, 0);
+    return parseInt(firstDigit + remainingDigits);
+  }
 
-export const User = mongoose.model("User" , userSchema);
+  const verificationCode = generateRandomFiveDigitNumber();
+  this.verificationCode = verificationCode;
+  this.verificationCodeExpire = Date.now() + 15 * 60 * 1000;
+  return verificationCode;
+};
+
+export const User = mongoose.model("User", userSchema);
