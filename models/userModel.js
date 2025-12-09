@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
-        bookTitle: string,
+        bookTitle: String,
         borrowedDate: Date,
         dueDate: Date,
       },

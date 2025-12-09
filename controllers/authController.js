@@ -1,11 +1,12 @@
-import ErrorHandler from "../middlewares/errorMiddlewares";
-import { User } from "../models/userModel";
+import ErrorHandler from "../middlewares/errorMiddlewares.js";
+import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { catchAsyncErrors } from "../middlewares/catchAsyncErrors";
-import { sendVerificationCode } from "../utils/sendVerificationCode";
+import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
+import { sendVerificationCode } from "../utils/sendVerificationCode.js";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
+  console.log("BODY =>", req.body);
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
