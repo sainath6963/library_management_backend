@@ -1,4 +1,5 @@
 import { generateVerificationOtpEmailTemlate } from "./emailTemplates.js";
+import { sendEmail } from "./sendEmail.js";
 
 export async function sendVerificationCode(verificationCode , email ,res){
     try {
