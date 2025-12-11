@@ -103,14 +103,13 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const login = catchAsyncErrors(async (req, res, next) => {
-
   console.log("===== LOGIN API HIT =====");
   console.log("Request Body:", req.body);
   console.log("Headers:", req.headers);
   console.log("Query Params:", req.query);
   console.log("Cookies:", req.cookies);
   console.log("==========================");
-  
+
   const { email, password } = req.body || {};
   if (!email || !password) {
     return next(new ErrorHandler("Please enter all fields", 400));
@@ -188,6 +187,58 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+// export const resetPassword = catchAsyncErrors(async (req, res, next) => {
+//   const { token } = req.params;
+
+//   const resetPasswordToken = crypto
+//     .createHash("sha256")
+//     .update(token)
+//     .digest("hex");
+
+//   const user = await User.findOne({
+//     resetPasswordToken,
+//     resetPasswordExpire: { $gt: Date.now() },
+//   });
+
+//   if (user) {
+//     console.log("Token expires at:", user.resetPasswordExpire);
+//   }
+
+//   if (!user) {
+//     return next(
+//       new ErrorHandler("Reset password token is invalid or has expired", 400)
+//     );
+//   }
+
+//   const { password, confirmPassword } = req.body;
+
+//   if (!password || !confirmPassword) {
+//     return next(
+//       new ErrorHandler("Please enter password & confirm password", 400)
+//     );
+//   }
+
+//   if (password !== confirmPassword) {
+//     return next(
+//       new ErrorHandler("Password & confirm Password do not match", 400)
+//     );
+//   }
+
+//   if (password.length < 8 || password.length > 16) {
+//     return next(
+//       new ErrorHandler("Password must be between 8 to 16 characters", 400)
+//     );
+//   }
+
+//   user.password = await bcrypt.hash(password, 10);
+//   user.resetPasswordToken = undefined;
+//   user.resetPasswordExpire = undefined;
+
+//   await user.save();
+
+//   sendToken(user, 200, "Password reset successfully", res);
+// });
+
 export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   const { token } = req.params;
 
@@ -202,7 +253,9 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   });
 
   if (user) {
-    console.log("Token expires at:", user.resetPasswordExpire);
+    console.log("Stored DB Token:", user.resetPasswordToken);
+    console.log("Expires At:", user.resetPasswordExpire);
+    console.log("Current Time:", new Date(Date.now()));
   }
 
   if (!user) {
@@ -255,27 +308,23 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
       new ErrorHandler("currentPassword password is incorrect.", 400)
     );
   }
-  if (
-    newPassword.length < 8 ||
-    newPassword.length > 16 
-  ) {
-return next(
+  if (newPassword.length < 8 || newPassword.length > 16) {
+    return next(
       new ErrorHandler("Password must be between 8 to 16 characters", 400)
     );
   }
-  if(newPassword !== confirmPassword){
-    new ErrorHandler("New Password and confirm new password do not match " , 400)
+  if (newPassword !== confirmPassword) {
+    new ErrorHandler(
+      "New Password and confirm new password do not match ",
+      400
+    );
   }
 
-
-  const hashedPassword = await bcrypt.hash(newPassword , 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
   user.password = hashedPassword;
   await user.save();
   res.status(200).json({
-    success:true,
-    message:"password updated."
-  })
+    success: true,
+    message: "password updated.",
+  });
 });
-
-
-
